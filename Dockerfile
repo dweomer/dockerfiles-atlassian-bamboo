@@ -17,10 +17,7 @@ ENV BAMBOO_HOME=/var/lib/bamboo \
     JAVA_VERSION=8 \
     JAVA_UPDATE=51
 
-COPY run-bamboo-agent.sh ${BAMBOO_INSTALL}/bin/
-
 RUN set -x \
- && chmod -v +x ${BAMBOO_INSTALL}/bin/run-bamboo-agent.sh \
  && export DEBIAN_FRONTEND=noninteractive \
 ### Install ca-certificates so that wget won't complain about the cert for the Oracle downloads site
  && apt-get --assume-yes --no-install-recommends install \
@@ -41,15 +38,19 @@ RUN set -x \
         libapr1 \
         libaprutil1 \
         libtcnative-1 \
-### Install curl, git, ssh, and wget along with ca-certificates-java
+### Install curl, git, ssh, wget, and xmlstarlet along with ca-certificates-java
         ca-certificates-java \
         curl \
         git \
         openssh-client \
         wget \
+        xmlstarlet \
 ### Patch the ca-certificates-java script to use our Java
  && sed -i -e 's/java-6-sun/java-${JAVA_VERSION}-oracle/g' /etc/ca-certificates/update.d/jks-keystore \
  && update-ca-certificates \
+### Modify the JDK installation to use our local cacerts
+ && mv -v ${JAVA_HOME}/jre/lib/security/cacerts ${JAVA_HOME}/jre/lib/security/cacerts.original \
+ && ln -vs /etc/ssl/certs/java/cacerts ${JAVA_HOME}/jre/lib/security/ \
 ### Let the JVM find the Tomcat Native and APR shared objects
  && ln -sv /usr/lib/x86_64-linux-gnu /usr/lib64 \
 ### Install Docker
@@ -72,6 +73,11 @@ RUN set -x \
  && apt-get clean \
  && rm -rf /tmp/* /var/tmp/* /var/cache/oracle-* /var/lib/apt/lists/*
 
+COPY src/main/container/srv/ /srv/
+### Not a fan of the extra layer but I am very much a fan of docker build caching 800+MB of lower layers
+RUN set -x \
+ && find /srv/ -name "*.sh" | xargs chmod -v +x
+
 USER ${BAMBOO_USER}:${BAMBOO_GROUP}
 
 VOLUME ["${BAMBOO_HOME}"]
@@ -81,5 +87,5 @@ EXPOSE 8085 54663
 
 WORKDIR ${BAMBOO_INSTALL}
 
-# Run in foreground
-CMD ["./bin/start-bamboo.sh", "-fg"]
+ENTRYPOINT ["/srv/bamboo.sh"]
+CMD ["server"]
