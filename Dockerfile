@@ -15,7 +15,7 @@ ENV BAMBOO_HOME=/var/lib/bamboo \
 #
     JAVA_HOME=/usr/lib/jvm/java-8-oracle \
     JAVA_VERSION=8 \
-    JAVA_UPDATE=51
+    JAVA_UPDATE=60
 
 RUN set -x \
  && export DEBIAN_FRONTEND=noninteractive \
