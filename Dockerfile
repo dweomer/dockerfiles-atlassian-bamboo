@@ -76,7 +76,12 @@ RUN set -x \
  && find ${BAMBOO_INSTALL} -name "*.sh" | xargs chmod -v +x \
 ### Cleanup
  && apt-get clean \
- && rm -rf /etc/java-6-sun /tmp/* /var/tmp/* /var/cache/oracle-* /var/lib/apt/lists/*
+ && rm -rf \
+        /etc/java-6-sun \
+        /tmp/* \
+        /var/tmp/* \
+        /var/cache/oracle-* \
+        /var/lib/apt/lists/*
 
 COPY src/main/container/srv/ /srv/
 ### Not a fan of the extra layer but I am very much a fan of docker build caching many megabytes of lower layers
