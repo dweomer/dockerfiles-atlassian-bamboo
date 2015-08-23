@@ -7,11 +7,11 @@ ENV BAMBOO_HOME=/var/lib/bamboo \
     BAMBOO_USER=bamboo \
     BAMBOO_GID=8085 \
     BAMBOO_GROUP=bamboo \
-    BAMBOO_VERSION=5.9.3 \
+    BAMBOO_VERSION=5.9.4 \
 #
     DOCKER_GID=999 \
     DOCKER_GROUP=docker \
-    DOCKER_VERSION=1.7.1 \
+    DOCKER_VERSION=1.8.1 \
 #
     JAVA_HOME=/usr/lib/jvm/java-8-oracle \
     JAVA_VERSION=8 \
@@ -58,7 +58,7 @@ RUN set -x \
  && wget --progress=dot:mega -P /tmp https://get.docker.com/builds/$(uname -s)/$(uname -i)/docker-${DOCKER_VERSION} \
  && mv -v /tmp/docker-${DOCKER_VERSION} /usr/bin/docker \
  && groupadd -rg ${DOCKER_GID} ${DOCKER_GROUP} \
- && chown -v :${DOCKER_GROUP} /usr/bin/docker \
+ && chown -v root:${DOCKER_GROUP} /usr/bin/docker \
  && chmod -v +xs /usr/bin/docker \
 ### Install Bamboo
  && mkdir -p ${BAMBOO_INSTALL} ${BAMBOO_HOME} \
@@ -67,14 +67,19 @@ RUN set -x \
  && wget --progress=dot:mega -O- "https://www.atlassian.com/software/bamboo/downloads/binary/atlassian-bamboo-${BAMBOO_VERSION}.tar.gz" | tar -xz --strip=1 -C "${BAMBOO_INSTALL}" \
  && echo "bamboo.home=${BAMBOO_HOME}" > ${BAMBOO_INSTALL}/atlassian-bamboo/WEB-INF/classes/bamboo-init.properties \
  && chmod -R 700 ${BAMBOO_INSTALL} ${BAMBOO_HOME} \
- && chown -R ${BAMBOO_USER}:${BAMBOO_GROUP} ${BAMBOO_INSTALL} ${BAMBOO_HOME} \
+ && chown -R ${BAMBOO_USER}:${BAMBOO_GROUP} \
+        ${BAMBOO_HOME} \
+        ${BAMBOO_INSTALL} \
+        /etc/default/cacerts \
+        /etc/java-${JAVA_VERSION}-oracle \
+        /etc/ssl \
  && find ${BAMBOO_INSTALL} -name "*.sh" | xargs chmod -v +x \
 ### Cleanup
  && apt-get clean \
- && rm -rf /tmp/* /var/tmp/* /var/cache/oracle-* /var/lib/apt/lists/*
+ && rm -rf /etc/java-6-sun /tmp/* /var/tmp/* /var/cache/oracle-* /var/lib/apt/lists/*
 
 COPY src/main/container/srv/ /srv/
-### Not a fan of the extra layer but I am very much a fan of docker build caching 800+MB of lower layers
+### Not a fan of the extra layer but I am very much a fan of docker build caching many megabytes of lower layers
 RUN set -x \
  && find /srv/ -name "*.sh" | xargs chmod -v +x
 
