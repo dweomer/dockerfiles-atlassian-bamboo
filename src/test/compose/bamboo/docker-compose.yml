@@ -20,7 +20,7 @@ webserver:
 # virtualbox docker host this registered itself within about a minute.
 appagent:
   command: agent
-  image: dweomer/atlassian-bamboo:5.9.3
+  image: dweomer/atlassian-bamboo:latest
   links:
     - appserver:bamboo
   volumes:
@@ -32,7 +32,7 @@ appserver:
   environment:
     BAMBOO_CONNECTOR_PROXY_NAME: bamboo.example.com
   hostname: bamboo
-  image: dweomer/atlassian-bamboo:5.9.3
+  image: dweomer/atlassian-bamboo:latest
   links:
     - database:database
 #  extra_hosts:

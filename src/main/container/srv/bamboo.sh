@@ -16,9 +16,9 @@ case "$1" in
         bamboo_init $1
 
         if [ -x ${BAMBOO_HOME}/bin/bamboo-agent.sh ]; then
-            exec ${BAMBOO_HOME}/bin/bamboo-agent.sh console
+            exec tini -- ${BAMBOO_HOME}/bin/bamboo-agent.sh console
         else
-            exec java -Dbamboo.home=${BAMBOO_HOME} -jar \
+            exec tini -- java -Dbamboo.home=${BAMBOO_HOME} -jar \
                 ${BAMBOO_INSTALL}/atlassian-bamboo/admin/agent/atlassian-bamboo-agent-installer-${BAMBOO_VERSION}.jar \
                 http://${BAMBOO_SERVER:-bamboo}:8085/agentServer/
         fi
@@ -27,7 +27,7 @@ case "$1" in
     server)
         bamboo_init $1
 
-        exec ${BAMBOO_INSTALL}/bin/start-bamboo.sh -fg
+        exec tini -- ${BAMBOO_INSTALL}/bin/start-bamboo.sh -fg
     ;;
 
     *)

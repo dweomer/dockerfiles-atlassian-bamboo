@@ -15,7 +15,9 @@ ENV BAMBOO_HOME=/var/lib/bamboo \
 #
     JAVA_HOME=/usr/lib/jvm/java-8-oracle \
     JAVA_VERSION=8 \
-    JAVA_UPDATE=60
+    JAVA_UPDATE=60 \
+#
+    TINI_VERSION=0.5.0
 
 RUN set -x \
  && export DEBIAN_FRONTEND=noninteractive \
@@ -60,6 +62,10 @@ RUN set -x \
  && groupadd -rg ${DOCKER_GID} ${DOCKER_GROUP} \
  && chown -v root:${DOCKER_GROUP} /usr/bin/docker \
  && chmod -v +xs /usr/bin/docker \
+### Install Tini
+ && wget --progress=dot:mega -P /tmp https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static \
+ && mv -v /tmp/tini-static /usr/bin/tini \
+ && chmod -v +x /usr/bin/tini \
 ### Install Bamboo
  && mkdir -p ${BAMBOO_INSTALL} ${BAMBOO_HOME} \
  && groupadd -g ${BAMBOO_GID} ${BAMBOO_GROUP} \
